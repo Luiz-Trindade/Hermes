@@ -1,0 +1,21 @@
+[project]
+name = "hermes"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langdetect>=1.0.9",
+    "llama-index>=0.14.5",
+    "llama-index-embeddings-openai>=0.5.1",
+    "llama-index-llms-anthropic>=0.9.7",
+    "llama-index-llms-azure-openai>=0.4.2",
+    "llama-index-llms-gemini>=0.6.1",
+    "llama-index-llms-groq>=0.4.1",
+    "llama-index-llms-litellm>=0.6.3",
+    "llama-index-llms-ollama>=0.8.0",
+    "llama-index-llms-openai>=0.6.5",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.5",
+    "yake>=0.6.0",
+]

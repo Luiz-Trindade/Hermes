@@ -1,6 +1,10 @@
 # Hermes AI Agent Framework
 
 <p align="center">
+  <img src="./images/logo.png" alt="Hermes AI Logo" width="140">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python Version">
   <img src="https://img.shields.io/badge/LlamaIndex-0.14.5+-orange.svg" alt="LlamaIndex">
   <img src="https://img.shields.io/badge/OpenAI-GPT--4-green.svg" alt="OpenAI">

@@ -1,12 +1,6 @@
-import os
 import asyncio
 from hermes.core import Agent
 from llama_index.core.llms import ChatMessage, MessageRole
-from dotenv import load_dotenv
-
-load_dotenv()
-
-API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 async def main():
@@ -48,7 +42,6 @@ async def main():
     market_agent = Agent(
         provider="openai",
         model="gpt-4o-mini",
-        api_key=API_KEY,
         name="AnalistaFinanceiro",
         description="Especialista em análise de mercado e cotações",
         prompt="Forneça análises detalhadas do mercado financeiro, tendências e cotações atuais. Seja preciso e use dados concretos.",
@@ -60,7 +53,6 @@ async def main():
     investment_agent = Agent(
         provider="openai",
         model="gpt-4o-mini",
-        api_key=API_KEY,
         name="ConsultorInvestimentos",
         description="Especialista em planejamento de investimentos",
         prompt="Ajude com estratégias de investimento, cálculo de retornos e recomendações baseadas no perfil do cliente.",
@@ -72,7 +64,6 @@ async def main():
     coordinator_agent = Agent(
         provider="openai",
         model="gpt-4o-mini",
-        api_key=API_KEY,
         name="Coordenador",
         description="Coordena e direciona perguntas para os especialistas apropriados",
         prompt="""Analise a pergunta do usuário e decida qual especialista consultar:

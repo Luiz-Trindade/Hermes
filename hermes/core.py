@@ -2,7 +2,7 @@ from datetime import datetime
 import asyncio
 from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.core.tools import FunctionTool
-from hermes.utils import extract_keywords, format_text
+from hermes.utils import extract_keywords, format_text, get_api_key_from_provider
 
 
 class Agent:
@@ -15,18 +15,16 @@ class Agent:
         description="",
         prompt="",
         tools=[],
-        agents=[],
         temperature=0.0,
         max_chat_history_length=20,
     ):
         """Initialize the Agent with the given parameters."""
         self.provider = provider
         self.model = model
-        self.api_key = api_key
+        self.api_key = api_key or get_api_key_from_provider(provider)
         self.name = name
         self.description = description
         self.prompt = prompt
-        self.agents = agents
         self.temperature = max(0.0, min(temperature, 1.0))
         self.max_chat_history_length = max_chat_history_length
 

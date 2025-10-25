@@ -68,17 +68,7 @@ async def main():
         temperature=0.7,
     )
 
-    # Agente Coordenador - criar ferramentas sincronas para os agentes
-    def consult_market_agent(query: str) -> str:
-        """Consulta o especialista em mercado financeiro"""
-        print("\n🔄 Consultando especialista em mercado financeiro...")
-        return asyncio.run(market_agent.execute(input_data=query))
-
-    def consult_investment_agent(query: str) -> str:
-        """Consulta o especialista em investimentos"""
-        print("\n🔄 Consultando especialista em investimentos...")
-        return asyncio.run(investment_agent.execute(input_data=query))
-
+    # Agente Coordenador
     coordinator_agent = Agent(
         provider="openai",
         model="gpt-4o-mini",
@@ -91,14 +81,13 @@ async def main():
         - Para perguntas complexas que envolvam ambos: consulte os dois especialistas
         
         Sempre explique qual especialista está sendo consultado e por quê.""",
-        tools=[consult_market_agent, consult_investment_agent],
+        tools=[market_agent, investment_agent],
         temperature=0.3,
     )
 
     chat_history = []
 
-    print("=== SISTEMA MULTI-AGENTE FINANCEIRO ===")
-    print("Especialistas disponíveis: AnalistaFinanceiro e ConsultorInvestimentos")
+    print("=== SISTEMA MULTI-AGENTE FINANCEIRO (VERSÃO SIMPLIFICADA) ===")
     print("Digite 'exit' para sair\n")
 
     while True:

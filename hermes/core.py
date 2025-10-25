@@ -1,4 +1,5 @@
 from datetime import datetime
+import asyncio
 from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.core.tools import FunctionTool
 from hermes.utils import extract_keywords, format_text
@@ -25,10 +26,13 @@ class Agent:
         self.name = name
         self.description = description
         self.prompt = prompt
-        self.tools = self._convert_tools(tools)
         self.agents = agents
         self.temperature = max(0.0, min(temperature, 1.0))
         self.max_chat_history_length = max_chat_history_length
+
+        # Converte tools e agents em FunctionTools
+        self.tools = self._convert_tools(tools)
+
         self.agent = FunctionAgent(
             name=self.name,
             description=self.description,
@@ -37,21 +41,94 @@ class Agent:
             llm=self._get_model_from_provider(),
         )
 
+    def _create_agent_wrapper(self, agent_instance):
+        """
+        Creates a wrapper function for an Agent instance.
+
+        Args:
+            agent_instance: An instance of Agent class
+
+        Returns:
+            A callable function that wraps the agent's execute method
+        """
+
+        def wrapper_function(query: str) -> str:
+            """
+            Consults the specialized agent with the given query.
+
+            Args:
+                query (str): The question or task to be processed by the agent
+
+            Returns:
+                str: The agent's response
+            """
+            print(f"\n🔄 Consultando agente '{agent_instance.name}'...")
+            try:
+                # Executa o agente de forma síncrona
+                response = asyncio.run(agent_instance.execute(input_data=query))
+                return str(response)
+            except Exception as e:
+                return f"Erro ao consultar {agent_instance.name}: {str(e)}"
+
+        # Define o nome e descrição da função baseado no agente
+        wrapper_function.__name__ = (
+            f"consult_{agent_instance.name.lower().replace(' ', '_')}"
+        )
+        wrapper_function.__doc__ = format_text(
+            f"""
+            Consults the specialized agent '{agent_instance.name}'.
+            
+            Agent Description: {agent_instance.description}
+            
+            Args:
+                query (str): The question or task to be processed by this specialist
+                
+            Returns:
+                str: Detailed response from {agent_instance.name}
+        """
+        )
+
+        return wrapper_function
+
     def _convert_tools(self, tools):
-        """Convert functions to FunctionTool objects automatically."""
+        """
+        Convert functions and Agent instances to FunctionTool objects automatically.
+
+        Args:
+            tools: List containing functions, FunctionTools, or Agent instances
+
+        Returns:
+            List of FunctionTool objects
+        """
         converted_tools = []
+
         for tool in tools:
-            if callable(tool) and not isinstance(tool, FunctionTool):
-                # Se for uma função, criar FunctionTool
+            # Se for uma instância de Agent, criar função wrapper
+            if isinstance(tool, Agent):
+                print(f"✨ Criando ferramenta automática para agente: {tool.name}")
+                wrapper_func = self._create_agent_wrapper(tool)
+
+                # Criar FunctionTool a partir da função wrapper
+                converted_tool = FunctionTool.from_defaults(
+                    fn=wrapper_func,
+                    name=wrapper_func.__name__,
+                    description=wrapper_func.__doc__,
+                )
+                converted_tools.append(converted_tool)
+
+            # Se for uma função comum (não FunctionTool)
+            elif callable(tool) and not isinstance(tool, FunctionTool):
                 tool_name = tool.__name__
                 tool_description = tool.__doc__ or f"Tool for {tool_name}"
                 converted_tool = FunctionTool.from_defaults(
                     fn=tool, name=tool_name, description=tool_description
                 )
                 converted_tools.append(converted_tool)
+
+            # Se já for FunctionTool, usar diretamente
             else:
-                # Se já for FunctionTool, usar diretamente
                 converted_tools.append(tool)
+
         return converted_tools
 
     def _get_model_from_provider(self):
@@ -123,7 +200,7 @@ class Agent:
         )
 
         if len(self.tools) > 0:
-            enhanced_prompt += "\n# Available tools (to assist you):"
+            enhanced_prompt += "\n# Available tools (to assist you):\n"
             for idx, tool in enumerate(self.tools, start=1):
                 enhanced_prompt += (
                     f"{idx}. {tool.metadata.name}: {tool.metadata.description}\n"

@@ -1,8 +1,6 @@
 # Hermes AI Agent Framework
 
-<p align="center">
-  <img src="./images/logo.png" alt="Hermes AI Logo" width="140">
-</p>
+![Hermes AI Logo](images/logo.png)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python Version">

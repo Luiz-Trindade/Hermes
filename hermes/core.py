@@ -75,6 +75,14 @@ class Agent:
                 model = Anthropic(
                     model=self.model, api_key=self.api_key, temperature=self.temperature
                 )
+            elif self.provider in ["gemini", "google"]:
+                from llama_index.llms.google_genai import GoogleGenAI
+
+                model = GoogleGenAI(
+                    model=self.model,
+                    api_key=self.api_key,
+                    temperature=self.temperature,
+                )
             else:
                 raise ValueError(f"Unsupported provider: {self.provider}")
             return model

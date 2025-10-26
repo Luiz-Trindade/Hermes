@@ -1,7 +1,11 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "hermes"
-version = "0.1.0"
-description = "Add your description here"
+name = "hermes-ai"
+version = "0.2.5"
+description = "Lightweight framework for modular, multi-provider AI agents."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -18,5 +22,12 @@ dependencies = [
     "llama-index-llms-openai>=0.6.5",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
-    "yake>=0.6.0",
+    "yake>=0.6.0"
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hermes*"]
+
+[tool.setuptools]
+zip-safe = false

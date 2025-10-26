@@ -52,8 +52,35 @@ async def main():
     )
 
     # Execute the agent
-    response = await agent.execute("What's the weather in Tokyo?")
+    response = await agent.execute(input_data="What's the weather in Tokyo?")
     print(response)
+
+asyncio.run(main())
+```
+
+**Output:**
+```
+Using the weather tool, I can see that the weather in Tokyo is Sunny with a temperature of 25°C. It's a beautiful day!
+```
+
+## 💬 Simple Chat Example
+
+```python
+import asyncio
+from hermes.core import Agent
+
+async def main():
+    # Initialize agent
+    agent = Agent(
+        provider="openai",
+        model="gpt-4o-mini"
+    )
+    
+    # Ask a question
+    response = await agent.execute(input_data="Qual é a capital do Brasil?")
+    print(response)
+    # Output: A capital do Brasil é Brasília. Ela foi oficialmente 
+    # inaugurada em 21 de abril de 1960...
 
 asyncio.run(main())
 ```
@@ -61,25 +88,57 @@ asyncio.run(main())
 ## 🏗️ Multi-Agent System
 
 ```python
-# Create specialized agents
-market_agent = Agent(
-    name="FinancialAnalyst",
-    description="Stock market expert",
-    tools=[get_market_data]
-)
+import asyncio
+from hermes.core import Agent
 
-investment_agent = Agent(
-    name="InvestmentAdvisor", 
-    description="Investment strategy expert",
-    tools=[calculate_returns]
-)
+async def main():
+    # Define specialist tools
+    def get_market_info(query: str) -> str:
+        """Get current market conditions and trends."""
+        return "Market is bullish today with major indices up 2%. USD at R$ 5.10."
+    
+    def calculate_investment(amount: float, period: int) -> str:
+        """Calculate investment returns with recommendations."""
+        expected_return = amount * (1 + 0.12) ** (period / 12)
+        return f"Investment of R$ {amount:,.2f} for {period} months: Expected return R$ {expected_return:,.2f}"
+    
+    # Create specialized agents
+    market_agent = Agent(
+        provider="openai",
+        model="gpt-4o-mini",
+        name="MarketAnalyst",
+        description="Expert in market analysis and quotes",
+        tools=[get_market_info]
+    )
 
-# Coordinate with master agent
-coordinator = Agent(
-    name="FinanceCoordinator",
-    description="Coordinates financial experts",
-    tools=[market_agent.execute, investment_agent.execute]
-)
+    investment_agent = Agent(
+        provider="openai",
+        model="gpt-4o-mini",
+        name="InvestmentAdvisor", 
+        description="Expert in investment planning",
+        tools=[calculate_investment]
+    )
+
+    # Coordinator agent that delegates to specialists
+    coordinator = Agent(
+        provider="openai",
+        model="gpt-4o-mini",
+        name="Coordinator",
+        description="Routes questions to appropriate specialists",
+        prompt="""Analyze user questions and delegate to the right expert:
+        - Market questions → MarketAnalyst
+        - Investment questions → InvestmentAdvisor
+        - Complex questions → consult both""",
+        tools=[market_agent, investment_agent]
+    )
+    
+    # Execute coordinated task
+    result = await coordinator.execute(
+        input_data="Should I invest R$ 10000 for 12 months? What's the market like?"
+    )
+    print(result)
+
+asyncio.run(main())
 ```
 
 ## 🔧 Core Components
@@ -88,7 +147,7 @@ coordinator = Agent(
 ```python
 Agent(
     provider="openai",           # LLM provider
-    model="gpt-4",              # Model name
+    model="gpt-4o-mini",        # Model name
     name="Assistant",           # Agent identity
     description="Helpful AI",   # Agent purpose
     prompt="Behavior guidelines", # System prompt
@@ -112,7 +171,7 @@ hermes/
 ├── core.py          # Main Agent class
 ├── utils.py         # Text processing utilities
 ├── tools.py         # Tool creation helpers
-└── examples/        # Usage examples
+└── providers.py     # LLM provider configurations
 ```
 
 ## 🎯 Use Cases

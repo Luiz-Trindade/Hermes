@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hermes-ai"
-version = "0.2.5"
-description = "Lightweight framework for modular, multi-provider AI agents."
+version = "0.2.6"
+description = "Hermes is a lightweight, powerful abstraction layer over LlamaIndex that simplifies building production-ready AI agents with essential utilities and multi-agent capabilities."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

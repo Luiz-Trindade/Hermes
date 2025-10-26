@@ -1,6 +1,6 @@
 # Hermes AI Agent Framework
 
-**Current Version: 0.2.6**
+**Current Version: 0.2.7**
 
 <p align="center">
     <img src="images/logo.png" alt="Hermes AI Logo" width="200">

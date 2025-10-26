@@ -1,7 +1,12 @@
-from datetime import datetime
 import asyncio
+import random
+from collections import deque
+from datetime import datetime
+from itertools import count
+
 from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.core.tools import FunctionTool
+
 from hermes.utils import extract_keywords, format_text, get_api_key_from_provider
 
 
@@ -15,22 +20,37 @@ class Agent:
         description="",
         prompt="",
         tools=[],
-        temperature=0.0,
+        temperature=0.7,
         max_chat_history_length=20,
+        debug=False,
     ):
         """Initialize the Agent with the given parameters."""
         self.provider = provider
         self.model = model
-        self.api_key = api_key or get_api_key_from_provider(provider)
+        self.debug = debug
+
+        # transform api_key into list, remove spaces and empty strings
+        self.api_keys = [k.strip() for k in (api_key or "").split(",") if k.strip()]
+
+        # if no keys provided, fetch from provider
+        if not self.api_keys:
+            self.api_keys = [get_api_key_from_provider(provider)]
+
         self.name = name
         self.description = description
         self.prompt = prompt
         self.temperature = max(0.0, min(temperature, 1.0))
         self.max_chat_history_length = max_chat_history_length
 
-        # Converte tools e agents em FunctionTools
+        # Convert tools and agents to FunctionTools
         self.tools = self._convert_tools(tools)
 
+        # Initialize the agent with the first key (will be replaced in execute)
+        self.agent = None
+        self._initialize_agent()
+
+    def _initialize_agent(self):
+        """Initialize or reinitialize the agent with current API key."""
         self.agent = FunctionAgent(
             name=self.name,
             description=self.description,
@@ -38,6 +58,10 @@ class Agent:
             tools=self.tools,
             llm=self._get_model_from_provider(),
         )
+
+    def _get_random_api_key(self):
+        """Select a random API key from the available keys."""
+        return random.choice(self.api_keys)
 
     def _create_agent_wrapper(self, agent_instance):
         """
@@ -60,15 +84,16 @@ class Agent:
             Returns:
                 str: The agent's response
             """
-            print(f"\n🔄 Consultando agente '{agent_instance.name}'...")
+            if self.debug:
+                print(f"\n🔄 Consulting agent '{agent_instance.name}'...")
             try:
-                # Executa o agente de forma síncrona
+                # Execute the agent synchronously
                 response = asyncio.run(agent_instance.execute(input_data=query))
                 return str(response)
             except Exception as e:
-                return f"Erro ao consultar {agent_instance.name}: {str(e)}"
+                return f"Error consulting {agent_instance.name}: {str(e)}"
 
-        # Define o nome e descrição da função baseado no agente
+        # Define function name and description based on the agent
         wrapper_function.__name__ = (
             f"consult_{agent_instance.name.lower().replace(' ', '_')}"
         )
@@ -101,12 +126,13 @@ class Agent:
         converted_tools = []
 
         for tool in tools:
-            # Se for uma instância de Agent, criar função wrapper
+            # If it's an Agent instance, create wrapper function
             if isinstance(tool, Agent):
-                print(f"✨ Criando ferramenta automática para agente: {tool.name}")
+                if self.debug:
+                    print(f"✨ Creating automatic tool for agent: {tool.name}")
                 wrapper_func = self._create_agent_wrapper(tool)
 
-                # Criar FunctionTool a partir da função wrapper
+                # Create FunctionTool from wrapper function
                 converted_tool = FunctionTool.from_defaults(
                     fn=wrapper_func,
                     name=wrapper_func.__name__,
@@ -114,7 +140,7 @@ class Agent:
                 )
                 converted_tools.append(converted_tool)
 
-            # Se for uma função comum (não FunctionTool)
+            # If it's a regular function (not FunctionTool)
             elif callable(tool) and not isinstance(tool, FunctionTool):
                 tool_name = tool.__name__
                 tool_description = tool.__doc__ or f"Tool for {tool_name}"
@@ -123,7 +149,7 @@ class Agent:
                 )
                 converted_tools.append(converted_tool)
 
-            # Se já for FunctionTool, usar diretamente
+            # If it's already a FunctionTool, use directly
             else:
                 converted_tools.append(tool)
 
@@ -132,30 +158,48 @@ class Agent:
     def _get_model_from_provider(self):
         """Dynamically import and return the model based on the provider."""
         try:
+            # Select a random API key if there are multiple
+            current_api_key = self._get_random_api_key()
+
+            if len(self.api_keys) > 1 and self.debug:
+                # Mask the key for logging (show only first and last characters)
+                masked_key = (
+                    f"{current_api_key[:8]}...{current_api_key[-4:]}"
+                    if len(current_api_key) > 12
+                    else "***"
+                )
+                print(f"🔑 Using API key: {masked_key}")
+
             if self.provider == "openai":
                 from llama_index.llms.openai import OpenAI
 
                 model = OpenAI(
-                    model=self.model, api_key=self.api_key, temperature=self.temperature
+                    model=self.model,
+                    api_key=current_api_key,
+                    temperature=self.temperature,
                 )
             elif self.provider == "azure":
                 from llama_index.llms.azure_openai import AzureOpenAI
 
                 model = AzureOpenAI(
-                    model=self.model, api_key=self.api_key, temperature=self.temperature
+                    model=self.model,
+                    api_key=current_api_key,
+                    temperature=self.temperature,
                 )
             elif self.provider == "anthropic":
                 from llama_index.llms.anthropic import Anthropic
 
                 model = Anthropic(
-                    model=self.model, api_key=self.api_key, temperature=self.temperature
+                    model=self.model,
+                    api_key=current_api_key,
+                    temperature=self.temperature,
                 )
             elif self.provider in ["gemini", "google"]:
                 from llama_index.llms.google_genai import GoogleGenAI
 
                 model = GoogleGenAI(
                     model=self.model,
-                    api_key=self.api_key,
+                    api_key=current_api_key,
                     temperature=self.temperature,
                 )
             else:
@@ -206,12 +250,6 @@ class Agent:
 
         return enhanced_prompt
 
-    def _auto_adjust_chat_history(self, chat_history):
-        """Automatically adjust chat history to maintain the maximum length."""
-        if chat_history and len(chat_history) > self.max_chat_history_length:
-            return chat_history[-self.max_chat_history_length :]
-        return chat_history or []
-
     def _enhance_input_data(self, input_data):
         """Enhance input data if necessary (placeholder for future enhancements)."""
         keywords = extract_keywords(input_data)
@@ -224,15 +262,22 @@ class Agent:
             {', '.join(keywords)}
         """.strip()
 
-        print(f"\n🛠️ Enhanced Input Data:\n{format_text(enhanced_input)}\n")
+        if self.debug:
+            print(f"\n🛠️ Enhanced Input Data:\n{format_text(enhanced_input)}\n")
         return format_text(enhanced_input)
 
     async def execute(self, input_data=None, chat_history=None):
         """Execute the agent with the given input data and chat history."""
         try:
+            # Reinitialize the agent with a new random API key on each execution
+            if len(self.api_keys) > 1:
+                self._initialize_agent()
+
             response = await self.agent.run(
                 user_msg=self._enhance_input_data(input_data),
-                chat_history=self._auto_adjust_chat_history(chat_history),
+                chat_history=deque(
+                    chat_history or [], maxlen=self.max_chat_history_length
+                ),
             )
             return response
         except Exception as e:

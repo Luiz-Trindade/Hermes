@@ -46,7 +46,7 @@ async def main():
         description="Especialista em análise de mercado e cotações",
         prompt="Forneça análises detalhadas do mercado financeiro, tendências e cotações atuais. Seja preciso e use dados concretos.",
         tools=[get_market_info],
-        temperature=0.7,
+        temperature=1.0,
     )
 
     # Agente Especialista em Investimentos
@@ -57,7 +57,7 @@ async def main():
         description="Especialista em planejamento de investimentos",
         prompt="Ajude com estratégias de investimento, cálculo de retornos e recomendações baseadas no perfil do cliente.",
         tools=[calculate_investment],
-        temperature=0.7,
+        temperature=1.0,
     )
 
     # Agente Coordenador
@@ -73,7 +73,7 @@ async def main():
         
         Sempre explique qual especialista está sendo consultado e por quê.""",
         tools=[market_agent, investment_agent],
-        temperature=0.3,
+        temperature=0.5,
     )
 
     chat_history = []

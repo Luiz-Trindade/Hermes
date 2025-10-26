@@ -363,3 +363,9 @@ def enhance_input_data(input_data, debug):
         print(f"\n🛠️ Enhanced Input Data:\n{format_text(enhanced_input)}\n")
 
     return format_text(enhanced_input)
+
+
+async def execute_web_interface(port=8000, directory="hermes/web_interface"):
+    from hermes.web import serve_static_fastapi
+
+    await serve_static_fastapi(port=port, directory=directory)

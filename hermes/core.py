@@ -105,3 +105,9 @@ class Agent:
             return response
         except Exception as e:
             return f"Error executing agent: {str(e)}"
+
+    async def execute_web_interface(self):
+        """Serve the agent's web interface."""
+        from hermes.utils import execute_web_interface
+
+        await execute_web_interface(directory="hermes/web_interface")

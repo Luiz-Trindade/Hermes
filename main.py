@@ -78,13 +78,14 @@ async def main():
         temperature=0.5,
         debug=True,
     )
+    server = await coordinator_agent.execute_web_interface()
 
     chat_history = []
 
     print("=== SISTEMA MULTI-AGENTE FINANCEIRO (VERSÃO SIMPLIFICADA) ===")
     print("Digite 'exit' para sair\n")
 
-    while True:
+    """ while True:
         input_data = input("👤 Sua pergunta: ")
 
         if input_data.lower() == "exit":
@@ -102,7 +103,7 @@ async def main():
 
         print(f"🤖 Resposta: {response}")
         print("-" * 80)
-        print("")
+        print("") """
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 **Current Version: 0.3.3**
 
 <p align="center">
-    <img src="images/logo.png" alt="Hermes AI Logo" width="200">
+    <img src="./images/logo.png" alt="Hermes AI Logo" width="200">
 </p>
 
 <p align="center">

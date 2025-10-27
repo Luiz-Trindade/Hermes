@@ -3,3 +3,4 @@ exclude uv.lock
 recursive-exclude images *
 recursive-exclude __pycache__ *
 recursive-include hermes/web_interface *
+recursive-include hermes/web_interface/dist *

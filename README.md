@@ -16,7 +16,7 @@
 
 ## 🚀 Smart LlamaIndex Abstraction for AI Agents
 
-Hermes is a lightweight, powerful abstraction layer over LlamaIndex that simplifies building production-ready AI agents with essential utilities and multi-agent capabilities.
+🌟 Hermes is a lightweight, powerful abstraction layer over LlamaIndex that simplifies building production-ready AI agents with essential utilities and multi-agent capabilities. 🚀
 
 ## ✨ Features
 
@@ -86,6 +86,41 @@ async def main():
 
 asyncio.run(main())
 ```
+
+## 🌐 Web Interface Example
+
+```python
+import asyncio
+from hermes.core import Agent
+from hermes.web import serve_static_fastapi
+
+async def main():
+    agent = Agent(
+        provider="openai",
+        model="gpt-4o-mini"
+    )
+
+    await serve_static_fastapi(port=8000, agent=agent)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+**🔗 Web Interface Repository:** [Hermes-Web](https://github.com/Luiz-Trindade/Hermes-Web)
+
+## 🖼️ Screenshots Web Interface
+
+![Main Interface](./images/screenshot_01.png)
+*Main chat interface with conversation history*
+
+![Tools Used](./images/screenshot_02.png)
+*Visualization of tools used by agents*
+
+![Message Input](./images/screenshot_03.png)
+*Message input interface with validation*
+
+![Loading State](./images/screenshot_04.png)
+*Loading indicator during processing*
 
 ## 🏗️ Multi-Agent System
 
@@ -190,7 +225,7 @@ hermes/
 - [ ] Advanced memory backends
 - [ ] Streaming responses
 - [ ] Plugin system
-- [ ] Web interface
+- [x] Web interface
 
 ## 💡 Contributing
 

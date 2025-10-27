@@ -2,3 +2,4 @@ exclude main.py
 exclude uv.lock
 recursive-exclude images *
 recursive-exclude __pycache__ *
+recursive-include hermes/web_interface *

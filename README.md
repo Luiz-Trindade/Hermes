@@ -1,6 +1,6 @@
 # Hermes AI Agent Framework
 
-**Current Version: 0.3.5**
+**Current Version: 0.3.6**
 
 <p align="center">
     <img src="./images/logo.png" alt="Hermes AI Logo" width="200">
@@ -92,7 +92,7 @@ asyncio.run(main())
 ```python
 import asyncio
 from hermes.core import Agent
-from hermes.web import serve_static_fastapi
+from hermes.web import hermes_web
 
 async def main():
     agent = Agent(
@@ -100,7 +100,7 @@ async def main():
         model="gpt-4o-mini"
     )
 
-    await serve_static_fastapi(port=8000, agent=agent)
+    await hermes_web(port=8000, agent=agent)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -2,7 +2,7 @@ import asyncio
 from hermes.core import Agent
 from llama_index.core.llms import ChatMessage, MessageRole
 
-from hermes.web import serve_static_fastapi
+from hermes.web import hermes_web
 
 
 async def main():
@@ -80,7 +80,7 @@ async def main():
         temperature=0.5,
         debug=True,
     )
-    await serve_static_fastapi(port=8000, directory="hermes/web_interface", agent=coordinator_agent)
+    await hermes_web(port=8000, agent=coordinator_agent)
 
     chat_history = []
 

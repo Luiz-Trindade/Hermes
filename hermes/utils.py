@@ -368,7 +368,7 @@ def enhance_input_data(input_data, debug):
 
 
 # async def execute_web_interface(port=8000, directory="hermes/web_interface"):
-#     from hermes.web import serve_static_fastapi
+#     from hermes.web import hermes_web
 #     import hermes
 
 #     try:
@@ -377,7 +377,7 @@ def enhance_input_data(input_data, debug):
 
 #         # Check if it exists inside the installed package
 #         if package_dir.exists():
-#             await serve_static_fastapi(port=port, directory=str(package_dir))
+#             await hermes_web(port=port, directory=str(package_dir))
 #             return
 
 #     except Exception:
@@ -386,6 +386,6 @@ def enhance_input_data(input_data, debug):
 #     # Dev mode: try relative path (useful when running directly from repo)
 #     relative_dir = Path(__file__).resolve().parent / "web_interface"
 #     if relative_dir.exists():
-#         await serve_static_fastapi(port=port, directory=str(relative_dir))
+#         await hermes_web(port=port, directory=str(relative_dir))
 #     else:
 #         raise RuntimeError(f"Could not find web_interface folder at: {relative_dir}")

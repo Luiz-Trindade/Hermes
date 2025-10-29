@@ -54,8 +54,6 @@ async def hermes_web(port: int = 8000, agent=None):
     app.mount("/", StaticFiles(directory=temp_dir, html=True), name="static")
 
     print(f"Serving static files on port {port}...")
-    config = uvicorn.Config(
-        app, host="127.0.0.1", port=port, log_level="info", reload=True
-    )
+    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()

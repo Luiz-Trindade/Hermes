@@ -243,29 +243,22 @@ def create_agent_wrapper(agent_instance, debug):
 
 
 def convert_tools_to_function_tools(tools, agent_instance):
-    """
-    Convert functions and Agent instances to FunctionTool objects automatically.
-
-    Args:
-        tools: List containing functions, FunctionTools, or Agent instances
-        agent_instance: The Agent instance that owns these tools (for accessing debug flag)
-
-    Returns:
-        List of FunctionTool objects
-    """
-    # Import here to avoid circular dependency
     from hermes.core import Agent
+    from llama_index.core.agent.workflow import FunctionAgent
 
     converted_tools = []
 
     for tool in tools:
-        # If it's an Agent instance, create wrapper function
+        # Bloquear FunctionAgent diretamente (não é suportado)
+        if isinstance(tool, FunctionAgent):
+            if agent_instance.debug:
+                print(f"⚠️ Ignorando FunctionAgent inválido: {tool.name}")
+            continue
+
         if isinstance(tool, Agent):
             if agent_instance.debug:
-                print(f"✨ Creating automatic tool for agent: {tool.name}")
+                print(f"✨ Criando tool automática para agent: {tool.name}")
             wrapper_func = create_agent_wrapper(tool, agent_instance.debug)
-
-            # Create FunctionTool from wrapper function
             converted_tool = FunctionTool.from_defaults(
                 fn=wrapper_func,
                 name=wrapper_func.__name__,
@@ -273,7 +266,6 @@ def convert_tools_to_function_tools(tools, agent_instance):
             )
             converted_tools.append(converted_tool)
 
-        # If it's a regular function (not FunctionTool)
         elif callable(tool) and not isinstance(tool, FunctionTool):
             tool_name = tool.__name__
             tool_description = tool.__doc__ or f"Tool for {tool_name}"
@@ -282,7 +274,6 @@ def convert_tools_to_function_tools(tools, agent_instance):
             )
             converted_tools.append(converted_tool)
 
-        # If it's already a FunctionTool, use directly
         else:
             converted_tools.append(tool)
 

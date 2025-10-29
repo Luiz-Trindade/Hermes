@@ -2,7 +2,10 @@
 from collections import deque
 
 from llama_index.core.agent.workflow import FunctionAgent
-from llama_index.core.tools import FunctionTool
+
+# --- hotfix: corrige erro "unhashable type: 'FunctionAgent'" ---
+FunctionAgent.__hash__ = lambda self: id(self)
+# ---------------------------------------------------------------
 
 from hermes.utils import (
     get_api_key_from_provider,

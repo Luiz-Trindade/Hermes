@@ -128,7 +128,7 @@ def get_model_from_provider(
     provider, model, api_key, temperature, debug, has_multiple_keys
 ):
     """
-    Dynamically import and return the model based on the provider.
+    Dynamically import and return the model and tokenizer based on the provider.
 
     Args:
         provider: The provider name (e.g., 'openai', 'anthropic')
@@ -139,7 +139,7 @@ def get_model_from_provider(
         has_multiple_keys: Whether multiple API keys are available
 
     Returns:
-        The initialized model instance
+        tuple: (llm_instance, tokenize_fn)
     """
     try:
         if has_multiple_keys and debug:
@@ -151,38 +151,73 @@ def get_model_from_provider(
 
         if provider == "openai":
             from llama_index.llms.openai import OpenAI
+            import tiktoken
 
-            return OpenAI(
+            llm = OpenAI(
                 model=model,
                 api_key=api_key,
                 temperature=temperature,
             )
+
+            # Tenta obter o encoding específico do modelo, senão usa cl100k_base
+            try:
+                tokenize_fn = tiktoken.encoding_for_model(model).encode
+            except KeyError:
+                tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
+
+            return llm, tokenize_fn
+
         elif provider == "azure":
             from llama_index.llms.azure_openai import AzureOpenAI
+            import tiktoken
 
-            return AzureOpenAI(
+            llm = AzureOpenAI(
                 model=model,
                 api_key=api_key,
                 temperature=temperature,
             )
+
+            # Azure usa os mesmos encodings do OpenAI
+            try:
+                tokenize_fn = tiktoken.encoding_for_model(model).encode
+            except KeyError:
+                tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
+
+            return llm, tokenize_fn
+
         elif provider == "anthropic":
             from llama_index.llms.anthropic import Anthropic
+            import tiktoken
 
-            return Anthropic(
+            llm = Anthropic(
                 model=model,
                 api_key=api_key,
                 temperature=temperature,
             )
+
+            # Anthropic usa cl100k_base como aproximação
+            tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
+
+            return llm, tokenize_fn
+
         elif provider in ["gemini", "google"]:
             from llama_index.llms.google_genai import GoogleGenAI
+            import tiktoken
 
-            return GoogleGenAI(
+            llm = GoogleGenAI(
                 model=model,
                 api_key=api_key,
                 temperature=temperature,
             )
+
+            # Google usa cl100k_base como aproximação
+            tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
+
+            return llm, tokenize_fn
+
         else:
             raise ValueError(f"Unsupported provider: {provider}")
+
     except ImportError as e:
         raise ImportError(
             f"Failed to import model for provider {provider}. "

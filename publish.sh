@@ -14,3 +14,4 @@ rm -rf dist build *.egg-info
 
 echo "==> Gerando nova build"
 uv build
+uv publish

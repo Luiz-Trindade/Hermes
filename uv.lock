@@ -968,7 +968,7 @@ wheels = [
 
 [[package]]
 name = "hermes-ai"
-version = "0.3.3"
+version = "0.3.15"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
@@ -985,6 +985,7 @@ dependencies = [
     { name = "llama-index-llms-openai" },
     { name = "python-dotenv" },
     { name = "requests" },
+    { name = "tiktoken" },
     { name = "uvicorn" },
     { name = "yake" },
 ]
@@ -1005,6 +1006,7 @@ requires-dist = [
     { name = "llama-index-llms-openai", specifier = ">=0.6.5" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "requests", specifier = ">=2.32.5" },
+    { name = "tiktoken", specifier = ">=0.12.0" },
     { name = "uvicorn", specifier = ">=0.38.0" },
     { name = "yake", specifier = ">=0.6.0" },
 ]

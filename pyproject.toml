@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hermes-ai"
-version = "0.3.9"
+version = "0.3.15"
 description = "Hermes is a lightweight, powerful abstraction layer over LlamaIndex that simplifies building production-ready AI agents with essential utilities and multi-agent capabilities."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -23,6 +23,7 @@ dependencies = [
     "llama-index-llms-openai>=0.6.5",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
+    "tiktoken>=0.12.0",
     "uvicorn>=0.38.0",
     "yake>=0.6.0",
 ]

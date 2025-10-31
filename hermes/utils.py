@@ -2,13 +2,12 @@
 import os
 import random
 import asyncio
-from calendar import day_name
+from calendar import day_name as weekday_names
 from datetime import datetime
 import yake
 from langdetect import detect
 from dotenv import load_dotenv
-from pathlib import Path
-from importlib import resources
+
 
 from llama_index.core.tools import FunctionTool
 
@@ -160,7 +159,7 @@ def get_model_from_provider(
                 temperature=temperature,
             )
 
-            # Tenta obter o encoding específico do modelo, senão usa cl100k_base
+            # Try to get model-specific encoding, otherwise use cl100k_base
             try:
                 tokenize_fn = tiktoken.encoding_for_model(model).encode
             except KeyError:
@@ -178,7 +177,7 @@ def get_model_from_provider(
                 temperature=temperature,
             )
 
-            # Azure usa os mesmos encodings do OpenAI
+            # Azure uses the same encodings as OpenAI
             try:
                 tokenize_fn = tiktoken.encoding_for_model(model).encode
             except KeyError:
@@ -196,7 +195,7 @@ def get_model_from_provider(
                 temperature=temperature,
             )
 
-            # Anthropic usa cl100k_base como aproximação
+            # Anthropic uses cl100k_base as approximation
             tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
 
             return llm, tokenize_fn
@@ -211,7 +210,7 @@ def get_model_from_provider(
                 temperature=temperature,
             )
 
-            # Google usa cl100k_base como aproximação
+            # Google uses cl100k_base as approximation
             tokenize_fn = tiktoken.get_encoding("cl100k_base").encode
 
             return llm, tokenize_fn
@@ -279,21 +278,31 @@ def create_agent_wrapper(agent_instance, debug):
 
 
 def convert_tools_to_function_tools(tools, agent_instance):
+    """
+    Converts various tool types to FunctionTool instances.
+
+    Args:
+        tools: List of tools (Agent, callable, or FunctionTool)
+        agent_instance: The agent instance requesting the conversion
+
+    Returns:
+        list: List of converted FunctionTool instances
+    """
     from hermes.core import Agent
     from llama_index.core.agent.workflow import FunctionAgent
 
     converted_tools = []
 
     for tool in tools:
-        # Bloquear FunctionAgent diretamente (não é suportado)
+        # Block FunctionAgent directly (not supported)
         if isinstance(tool, FunctionAgent):
             if agent_instance.debug:
-                print(f"⚠️ Ignorando FunctionAgent inválido: {tool.name}")
+                print(f"⚠️ Ignoring invalid FunctionAgent: {tool.name}")
             continue
 
         if isinstance(tool, Agent):
             if agent_instance.debug:
-                print(f"✨ Criando tool automática para agent: {tool.name}")
+                print(f"✨ Creating automatic tool for agent: {tool.name}")
             wrapper_func = create_agent_wrapper(tool, agent_instance.debug)
             converted_tool = FunctionTool.from_defaults(
                 fn=wrapper_func,
@@ -329,9 +338,11 @@ def get_enhanced_prompt(name, description, prompt, tools):
     Returns:
         str: The enhanced prompt
     """
+    # FIX: Renamed import to avoid variable name conflict
     now = datetime.now()
-    day_name = day_name[now.weekday()]
-    current_datetime = f"{day_name} {now.strftime('%d/%m/%Y %H:%M:%S')}"
+    current_day = weekday_names[now.weekday()]
+    current_datetime = f"{current_day} {now.strftime('%d/%m/%Y %H:%M:%S')}"
+
     enhanced_prompt = format_text(
         f"""
         # Identity (Agent Profile):

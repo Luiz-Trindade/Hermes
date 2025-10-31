@@ -2,6 +2,7 @@
 import os
 import random
 import asyncio
+from calendar import day_name
 from datetime import datetime
 import yake
 from langdetect import detect
@@ -328,7 +329,9 @@ def get_enhanced_prompt(name, description, prompt, tools):
     Returns:
         str: The enhanced prompt
     """
-    current_datetime = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    now = datetime.now()
+    day_name = day_name[now.weekday()]
+    current_datetime = f"{day_name} {now.strftime('%d/%m/%Y %H:%M:%S')}"
     enhanced_prompt = format_text(
         f"""
         # Identity (Agent Profile):
